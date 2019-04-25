@@ -11,88 +11,15 @@ For full documentation, see <http://vulnreport.io/documentation>
 
 Vulnreport is a Ruby web application (Sinatra/Rack stack) backed by a PostgreSQL database with a Redis cache layer.
 
-Vulnreport can be installed on a local VM or server behind something like nginx, or can be deployed to [Heroku](https://heroku.com).
+This version of vulnreport is intended to be deployed with docker-compose for local use. Follow the steps below to set up your user:
 
-### Local Deploy / Your own server
+1. You must create a .env file and a .postgres.env file based on the two example files provided (.env.example & .postgres.env.example). The username and password for the database must match between the two files.
+2. Optionally, add an SSL keypair named server.key (private) and server.crt (public). If you do not add these, they will be generated for you in the next step.
+3. Run the `init.sh` script locally and go grab a coffee. This will create a self signed cert, build the vulnreport docker image and spin up the whole stack with intially seeded values.
 
-To deploy locally, you'll need to make sure you have installed the dependencies:
-* Ruby >= 2.1
-* PostgreSQL
-* Redis
-* Rollbar
-* Bundler
+The server will be available at [https://127.0.0.1:443](https://127.0.0.1:443).The default admin user has been created for you with username `admin` and password `admin`. This should be **immediately rotated and/or SSO should be configured.**
 
-Clone the repo and open up the .env file, updating it as necessary. The run `bundle install`. You'll probably want to modify `start.sh` to make it work for your environment - the one included in the repo is intended to be used for local use during debugging/development.
-
-You should also create a .env file based on .env.example, or set the same ENV variables defined in .env in your environment.
-
-### Heroku Deploy
-
-#### Automatic Deployment
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
-You can automatically deploy to Heroku. After doing so, follow the instructions below to login to Vulnreport and finish configuration.
-
-#### Manual Deployment
-
-To deploy to Heroku (assuming you have created a Heroku app and have the toolbelt installed)
-
-```sh
-git clone [Vulnreport repo url]
-
-heroku git:remote -a [Heroku app name]
-
-heroku addons:create heroku-postgresql:hobby-dev
-heroku addons:create heroku-redis:hobby-dev
-heroku addons:create rollbar:free
-heroku addons:create sendgrid:starter
-```
-
-You'll then want to open up the .env file and copy the keys/values (updating values where necessary) to the Heroku settings for your app. This can also be done via the toolbelt CLI commands. Note that the default ENV variables after running the addons should be fine, but you can double check. You'll definitely want to update `VR_SESSION_SECRET`. If this isn't your production install, you should change `RACK_ENV` to `development`.
-
-```sh
-heroku config:set VR_SESSION_SECRET=abc123456
-heroku config:set RACK_ENV=production
-
-git push heroku master
-```
-
-You can now follow the instructions for installation as you would if you were running Vulnreport locally.
-
-## Installation
-
-To handle the initial configuration for Vulnreport, run the `SEED.rb` script. If you are deploying on Heroku, run this via `heroku run ./SEED.rb`.
-
-If you used the automated 'Deploy to Heroku' feature, this step should have been handled for you automatically.
-
-```
-Running ./SEED.rb on ⬢ vulnreport-test... up, run.8035
-
-Vulnreport 3.0.0.alpha seed script
-WARNING: This script should be run ONCE immediately after deploying and then DELETED
-
-Setting up Vulnreport now...
-
-Setting up the PostgreSQL database...
-	Done
-
-Seeding the database...
-	Done
-
-User ID 1 created for you
-
-
-ALL DONE! :)
-Login to Vulnreport now and go through the rest of the settings!
-
-```
-
-Now, delete the SEED.rb file.
-
-The default admin user has been created for you with username `admin` and password `admin`. This should be **immediately rotated and/or SSO should be configured.**
-
-At this point you should go to your Vulnreport URL (e.g. https://my-vr-test.herokuapp.com above) and login with the user created. Go through the Vulnreport and user settings to configure your instance of Vulnreport.
+You can stop the server any time with `docker-compose down`, and restart it with `docker-compose up -d`
 
 ## Pentest!
 

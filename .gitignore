@@ -1,4 +1,5 @@
 .env
+.postgres.env
 server.*
 .DS_*
 *.rdb

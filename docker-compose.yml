@@ -1,0 +1,42 @@
+version: '3.5'
+
+
+volumes:
+    vr-postgres:
+    vr-redis:
+services:
+    postgres:
+      image: postgres
+      env_file:
+        - .postgres.env
+      ports:
+        - '5432:5432'
+      volumes:
+        - vr-postgres:/var/lib/postgresql/data
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U vulnreport"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+
+    redis:
+      image: redis
+      ports:
+        - '6379:6379'
+      volumes:
+        - vr-redis:/var/lib/redis/data
+
+    vulnreport:
+      build: .
+      container_name: vulnreport
+      links:
+        - postgres
+        - redis
+      volumes:
+        - .:/vulnreport
+      ports:
+        - '443:443'
+      env_file:
+        - .env
+      depends_on:
+        - postgres
