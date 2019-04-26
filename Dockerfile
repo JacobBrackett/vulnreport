@@ -9,7 +9,11 @@ RUN curl -L -s -m 10 https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-ke
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" | tee /etc/apt/sources.list.d/postgresql.list
 
 
-RUN apt-get update && apt-get install -qq -y build-essential libpq-dev postgresql-server-dev-11 postgresql-11 postgresql-client-11 redis-server wkhtmltopdf --fix-missing --no-install-recommends
+RUN apt-get update && apt-get install -qq -y build-essential libpq-dev postgresql-server-dev-11 postgresql-11 postgresql-client-11 redis-server wkhtmltopdf libicu-dev --fix-missing --no-install-recommends
+RUN apt-get install -y --fix-missing xvfb
+
+# wkhtmltopdf needs some sort of x server
+RUN printf '#!/bin/bash\nxvfb-run -a --server-args="-screen 0, 1024x768x24" /usr/bin/wkhtmltopdf -q $*' > /usr/bin/wkhtmltopdf.sh && chmod a+x /usr/bin/wkhtmltopdf.sh && ln -s /usr/bin/wkhtmltopdf.sh /usr/local/bin/wkhtmltopdf
 
 ENV INSTALL_PATH /
 RUN mkdir -p $INSTALL_PATH
